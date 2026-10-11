@@ -34,6 +34,7 @@ import {
 	type TaskType,
 } from "@/lib/project-api";
 import { isMacPlatform, SHORTCUT_DISPLAY } from "@/lib/shortcuts/keymap";
+import { copyToClipboard } from "@/lib/utils";
 
 import {
 	getPriority,
@@ -127,11 +128,11 @@ export function TaskContextMenu({
 		: epicsPagination;
 
 	const copyId = () => {
-		navigator.clipboard?.writeText(taskLabel)?.catch(() => {});
+		void copyToClipboard(taskLabel);
 	};
 	const copyLink = () => {
 		const url = `${window.location.origin}/projects/${projectId}/tasks/${task.id}`;
-		navigator.clipboard?.writeText(url)?.catch(() => {});
+		void copyToClipboard(url);
 	};
 
 	return (

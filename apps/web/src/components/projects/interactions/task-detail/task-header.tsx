@@ -29,7 +29,7 @@ import {
 import { formatDate } from "@/lib/format-date";
 import type { Task } from "@/lib/interaction-api";
 import { deleteTask } from "@/lib/interaction-api";
-import { cn } from "@/lib/utils";
+import { cn, copyToClipboard } from "@/lib/utils";
 import { shortId } from "./helpers";
 
 interface TaskHeaderProps {
@@ -85,7 +85,7 @@ export function TaskHeader({
 		const taskUrl = projectId
 			? `${window.location.origin}/projects/${projectId}/tasks/${task.id}`
 			: window.location.href;
-		navigator.clipboard?.writeText(taskUrl)?.catch(() => {});
+		void copyToClipboard(taskUrl);
 		setLinkCopied(true);
 		setTimeout(() => setLinkCopied(false), 2000);
 	};

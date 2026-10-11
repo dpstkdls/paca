@@ -79,7 +79,7 @@ import { ApiErrorCode, getApiErrorCode } from "@/lib/api-error";
 import { environmentsQueryOptions } from "@/lib/environment-api";
 import type { Role } from "@/lib/role-api";
 import { splitShellCommand } from "@/lib/shell-command";
-import { cn } from "@/lib/utils";
+import { cn, copyToClipboard } from "@/lib/utils";
 import { AcpBridgeSetup, CommandBox } from "./acp-bridge-setup";
 import { ProjectRolePicker } from "./project-role-picker";
 import { useSetAgentGlobalRole } from "./use-set-agent-global-role";
@@ -1004,22 +1004,19 @@ export function CreateAgentDialog({
 											command={cliLoginCommand(cliProvider)}
 											copied={copiedCliLoginCommand}
 											onCopy={() => {
-												navigator.clipboard
-													.writeText(cliLoginCommand(cliProvider))
-													.then(() => {
+												// Leave copiedCliLoginCommand untouched on failure so the
+												// button doesn't falsely claim success for a command the
+												// user may need to copy manually.
+												void copyToClipboard(cliLoginCommand(cliProvider)).then(
+													(ok) => {
+														if (!ok) return;
 														setCopiedCliLoginCommand(true);
 														setTimeout(
 															() => setCopiedCliLoginCommand(false),
 															2000,
 														);
-													})
-													.catch(() => {
-														// Clipboard write can fail (permission denied,
-														// insecure context) — leave copiedCliLoginCommand
-														// untouched so the button doesn't falsely claim
-														// success for a command the user may need to copy
-														// manually.
-													});
+													},
+												);
 											}}
 										/>
 									</div>

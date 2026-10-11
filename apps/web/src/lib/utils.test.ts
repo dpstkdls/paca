@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { cleanBlocks, cn, getInitials } from "./utils";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanBlocks, cn, copyToClipboard, getInitials } from "./utils";
 
 describe("cn", () => {
 	it("joins class names and ignores falsy values", () => {
@@ -85,5 +85,57 @@ describe("getInitials", () => {
 
 	it("uppercases lowercase input", () => {
 		expect(getInitials("ada lovelace")).toBe("AL");
+	});
+});
+
+describe("copyToClipboard", () => {
+	// jsdom doesn't implement document.execCommand, so assign it directly and
+	// restore afterwards rather than spying on a non-existent method.
+	const originalExecCommand = (document as unknown as { execCommand?: unknown })
+		.execCommand;
+
+	const stubExecCommand = (result: boolean) => {
+		const fn = vi.fn().mockReturnValue(result);
+		(document as unknown as { execCommand: unknown }).execCommand = fn;
+		return fn;
+	};
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+		vi.restoreAllMocks();
+		(document as unknown as { execCommand: unknown }).execCommand =
+			originalExecCommand;
+	});
+
+	it("uses navigator.clipboard when available", async () => {
+		const writeText = vi.fn().mockResolvedValue(undefined);
+		vi.stubGlobal("navigator", { clipboard: { writeText } });
+
+		await expect(copyToClipboard("hello")).resolves.toBe(true);
+		expect(writeText).toHaveBeenCalledWith("hello");
+	});
+
+	it("falls back to execCommand when clipboard write rejects (insecure context)", async () => {
+		const writeText = vi.fn().mockRejectedValue(new Error("insecure"));
+		vi.stubGlobal("navigator", { clipboard: { writeText } });
+		const execCommand = stubExecCommand(true);
+
+		await expect(copyToClipboard("hello")).resolves.toBe(true);
+		expect(execCommand).toHaveBeenCalledWith("copy");
+	});
+
+	it("falls back to execCommand when navigator.clipboard is absent", async () => {
+		vi.stubGlobal("navigator", {});
+		const execCommand = stubExecCommand(true);
+
+		await expect(copyToClipboard("hello")).resolves.toBe(true);
+		expect(execCommand).toHaveBeenCalledWith("copy");
+	});
+
+	it("returns false when every method fails", async () => {
+		vi.stubGlobal("navigator", {});
+		stubExecCommand(false);
+
+		await expect(copyToClipboard("hello")).resolves.toBe(false);
 	});
 });

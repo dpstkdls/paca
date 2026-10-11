@@ -46,6 +46,7 @@ import {
 	portForwardQueryOptions,
 	portForwardUrl,
 } from "@/lib/environment-api";
+import { copyToClipboard } from "@/lib/utils";
 
 // A full page for one comment — reached from PortForwardCommentsTab's list
 // (or a link shared directly). Genuinely additive, not just a relocation:
@@ -118,7 +119,7 @@ export function CommentDetailView({
 
 	const handleCopyLink = () => {
 		const url = `${window.location.origin}/projects/${projectId}/environments/${environmentId}/port-forwards/${portForwardId}/comments/${annotationId}`;
-		navigator.clipboard?.writeText(url)?.catch(() => {});
+		void copyToClipboard(url);
 		setLinkCopied(true);
 		setTimeout(() => setLinkCopied(false), 2000);
 	};

@@ -83,6 +83,7 @@ import type {
 	TaskType,
 } from "@/lib/project-api";
 import { createLoadMoreScrollHandler } from "@/lib/scroll-pagination";
+import { copyToClipboard } from "@/lib/utils";
 
 interface AutomationNodeConfigPanelProps {
 	node: AutomationNode;
@@ -1562,13 +1563,8 @@ function WebhookTokenSection({
 	}
 
 	async function handleCopy(value: string, which: "token" | "url") {
-		try {
-			await navigator.clipboard.writeText(value);
-			setCopied(which);
-		} catch {
-			// Clipboard access can fail (permissions, insecure context); the
-			// user can still select-and-copy the visible text manually.
-		}
+		// User can still select-and-copy the visible text manually if this fails.
+		if (await copyToClipboard(value)) setCopied(which);
 	}
 
 	return (

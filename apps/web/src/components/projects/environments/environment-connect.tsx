@@ -42,6 +42,7 @@ import {
 	environmentSSHKeysQueryOptions,
 	startEnvironment,
 } from "@/lib/environment-api";
+import { copyToClipboard } from "@/lib/utils";
 
 // The environment "Connect" page — a dedicated route
 // (routes/.../environments/$environmentId/connect.tsx), not a tab on
@@ -77,17 +78,13 @@ function CommandBox({ command }: { command: string }) {
 	const [copied, setCopied] = useState(false);
 
 	const copy = () => {
-		navigator.clipboard
-			.writeText(command)
-			.then(() => {
-				setCopied(true);
-				setTimeout(() => setCopied(false), 2000);
-			})
-			.catch(() => {
-				// Best-effort — clipboard write can fail (permission denied,
-				// insecure context); the command is still selectable/copyable
-				// by hand from the <code> block itself.
-			});
+		// Best-effort — the command is still selectable/copyable by hand from
+		// the <code> block itself if the copy fails.
+		void copyToClipboard(command).then((ok) => {
+			if (!ok) return;
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		});
 	};
 
 	return (

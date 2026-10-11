@@ -42,6 +42,7 @@ import { ApiErrorCode, getApiErrorCode } from "@/lib/api-error";
 import { validateUsername } from "@/lib/auth-validation";
 import { generatePassword } from "@/lib/generate-password";
 import type { Role, RoleSummary } from "@/lib/role-api";
+import { copyToClipboard } from "@/lib/utils";
 
 /** Loose RFC 5322-ish check — the server is the source of truth for validity;
  * this only catches obviously-malformed input before a round trip. */
@@ -236,7 +237,8 @@ export function UserFormDialog({
 
 	const handleCopy = () => {
 		if (step.phase !== "password") return;
-		void navigator.clipboard.writeText(step.account.password).then(() => {
+		void copyToClipboard(step.account.password).then((ok) => {
+			if (!ok) return;
 			setCopied(true);
 			setTimeout(() => setCopied(false), 2000);
 		});

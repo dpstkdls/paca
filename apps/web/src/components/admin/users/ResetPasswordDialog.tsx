@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { resetUserPassword, type User } from "@/lib/admin-api";
 import { ApiErrorCode, getApiErrorCode } from "@/lib/api-error";
 import { generatePassword } from "@/lib/generate-password";
+import { copyToClipboard } from "@/lib/utils";
 
 interface ResetPasswordDialogProps {
 	user: User;
@@ -80,8 +81,9 @@ export function ResetPasswordDialog({
 
 	const handleCopy = () => {
 		if (!generatedPassword) return;
-		navigator.clipboard.writeText(generatedPassword);
-		setCopied(true);
+		void copyToClipboard(generatedPassword).then((ok) => {
+			if (ok) setCopied(true);
+		});
 	};
 
 	useEffect(() => {
